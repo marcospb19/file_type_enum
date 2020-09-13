@@ -11,7 +11,24 @@ pub enum FileType {
     Socket,
 }
 
+/// # Variants:
+/// ```rust
+/// match file_type {
+///     FileType::File        => { /* ... */ },
+///     FileType::Directory   => { /* ... */ },
+///     FileType::Symlink     => { /* ... */ },
+///     FileType::BlockDevice => { /* ... */ },
+///     FileType::CharDevice  => { /* ... */ },
+///     FileType::Fifo        => { /* ... */ },
+///     FileType::Socket      => { /* ... */ },
+/// }
+/// ```
 impl FileType {
+    /// Try to get `FileType` from a path.
+    ///
+    /// This function follows symlinks, so it cannot ever return a
+    /// FileType::Symlink, see `try_from_symlink_path` if you wanna check
+    /// symlinks.
     pub fn try_from_path(path: impl AsRef<Path>) -> Result<Self, io::Error> {
         let ft: fs::FileType = fs::metadata(path.as_ref())?.file_type();
         // Check each type, except for symlink, because fs::metadata() follows symlinks
@@ -35,6 +52,9 @@ impl FileType {
         Ok(result)
     }
 
+    /// Try to get `FileType` from a path.
+    ///
+    /// Don't follow symlinks, so the result can be `FileType::Symlink` itself.
     pub fn try_from_symlink_path(path: impl AsRef<Path>) -> Result<Self, io::Error> {
         let ft: fs::FileType = fs::symlink_metadata(path.as_ref())?.file_type();
         // Check each type
