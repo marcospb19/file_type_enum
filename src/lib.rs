@@ -130,7 +130,7 @@ impl FileType {
     ///
     /// This function follows symlinks, so it can never return a
     /// FileType::Symlink.
-    pub fn from_path(path: &dyn AsRef<Path>) -> Result<Self, io::Error> {
+    pub fn from_path(path: impl AsRef<Path>) -> Result<Self, io::Error> {
         let fs_file_type = fs::metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
         Ok(result)
@@ -140,7 +140,7 @@ impl FileType {
     ///
     /// Don't follow symlinks, so the result can be the variant
     /// `FileType::Symlink` too.
-    pub fn from_symlink_path(path: &dyn AsRef<Path>) -> Result<Self, io::Error> {
+    pub fn from_symlink_path(path: impl AsRef<Path>) -> Result<Self, io::Error> {
         let fs_file_type = fs::symlink_metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
         Ok(result)
@@ -256,5 +256,20 @@ impl fmt::Display for FileType {
             #[cfg(unix)]
             FileType::Socket => write!(f, "socket"),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn testando_123() {
+        let path = "/tmp";
+        let file_type = FileType::from_path(path).unwrap();
+
+        println!("There's a {} at {}!", file_type, path);
+
+        assert!(true)
     }
 }
