@@ -1,8 +1,8 @@
 //! This crate grants a enum with one variant for each file type.
 //!
 //! **Cross-platform and small**, this crate has a single file with around _150_
-//! lines of source code. Simplest implementation, should be in `std`. If you
-//! want to check file types, here's a _enum_ for you, don't rewrite it.
+//! lines of source code. Simplest implementation that could be in `std::fs`. If
+//! you want to check file types, here's a _enum_ for you, don't rewrite it.
 //!
 //! # Enum FileType:
 //! ```rust
@@ -97,8 +97,7 @@ use std::{fmt, fs, io, path::Path};
 #[cfg(unix)]
 use std::os::unix::fs::FileTypeExt;
 
-/// # Variants:
-///
+/// Enum with a variant for each file type.
 /// ```ignore
 /// match file_type {
 ///     FileType::File        => { /* ... */ },
@@ -129,7 +128,24 @@ impl FileType {
     /// Try to get `FileType` from a path.
     ///
     /// This function follows symlinks, so it can never return a
-    /// FileType::Symlink.
+    /// `FileType::Symlink`.
+    ///
+    /// # Example:
+    /// ```rust
+    /// use file_type_enum::FileType;
+    ///
+    /// fn main() {
+    ///     let path = "/dev/tty";
+    ///     let file_type = FileType::from_path(path).unwrap();
+    ///
+    ///     println!("There's a {} at {}!", file_type, path);
+    ///     // Outputs: "There's a char device at /dev/tty!"
+    /// }
+    /// ```
+    ///
+    /// # Errors:
+    /// - Path does not exist.
+    /// - The user lacks permissions to run `fs::metadata(path)`.
     pub fn from_path(path: impl AsRef<Path>) -> Result<Self, io::Error> {
         let fs_file_type = fs::metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
@@ -140,6 +156,23 @@ impl FileType {
     ///
     /// Don't follow symlinks, so the result can be the variant
     /// `FileType::Symlink` too.
+    ///
+    /// # Example:
+    /// ```rust
+    /// use file_type_enum::FileType;
+    ///
+    /// fn main() {
+    ///     let path = "/dev/stdout";
+    ///     let file_type = FileType::from_symlink_path(path).unwrap();
+    ///
+    ///     println!("There's a {} at {}!", file_type, path);
+    ///     // Outputs: "There's a symlink at /dev/stdout!"
+    /// }
+    /// ```
+    ///
+    /// # Errors:
+    /// - Path does not exist.
+    /// - The user lacks permissions to run `fs::symlink_metadata(path)`.
     pub fn from_symlink_path(path: impl AsRef<Path>) -> Result<Self, io::Error> {
         let fs_file_type = fs::symlink_metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
@@ -202,7 +235,7 @@ impl FileType {
 
 impl From<fs::FileType> for FileType {
     fn from(ft: fs::FileType) -> Self {
-        // Check each type, except for symlink, because fs::metadata() follows symlinks
+        // Check each type
         #[cfg(unix)]
         let result = {
             if ft.is_file() {
@@ -256,20 +289,5 @@ impl fmt::Display for FileType {
             #[cfg(unix)]
             FileType::Socket => write!(f, "socket"),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn testando_123() {
-        let path = "/tmp";
-        let file_type = FileType::from_path(path).unwrap();
-
-        println!("There's a {} at {}!", file_type, path);
-
-        assert!(true)
     }
 }
