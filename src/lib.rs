@@ -253,7 +253,7 @@ impl From<fs::FileType> for FileType {
             } else if ft.is_socket() {
                 FileType::Socket
             } else {
-                panic!();
+                unreachable!("unknown file type {:?} encountered", ft)
             }
         };
 
@@ -266,7 +266,7 @@ impl From<fs::FileType> for FileType {
             } else if ft.is_symlink() {
                 FileType::Symlink
             } else {
-                panic!();
+                unreachable!("unknown file type {:?} encountered", ft)
             }
         };
 
