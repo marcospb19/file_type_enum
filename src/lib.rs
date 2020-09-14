@@ -1,8 +1,8 @@
 //! This crate grants a enum with one variant for each file type.
 //!
 //! **Cross-platform and small**, this crate has a single file with around _150_
-//! lines of source code. Simplest implementation that could be in `std::fs`. If
-//! you want to check file types, here's a _enum_ for you, don't rewrite it.
+//! lines of source code. Simplest implementation. if you want to check file
+//! types, here's a _enum_ for you, don't rewrite it.
 //!
 //! # Enum FileType:
 //! ```rust
@@ -58,11 +58,11 @@
 //!
 //! ---
 //!
-//! By default, if `path` points to _symlink_ `FileType::from_path()` considers
-//! the path at the symlink's target location (this implies that the returned
-//! file type can't be `FileType::Symlink`).
+//! By default, if `path` points to _symlink_, then `FileType::from_path()`
+//! considers the path at the _symlink_'s target location (this implies that the
+//! returned file type can't be `FileType::Symlink`).
 //!
-//! If you don't wanna follow _symlinks_, use `FileType::from_symlink_path`
+//! If you don't want to follow _symlinks_, use `FileType::from_symlink_path`
 //! instead, this function may return `Ok(FileType::Symlink)`.
 //!
 //! ```rust
@@ -79,13 +79,14 @@
 //!
 //! ---
 //!
-//! `FileType::from::<fs::FileType>(fs_ft)` is also available.
+//! The conversion `FileType::from::<fs::FileType>` is also available for
+//! convenience.
 //!
 //! # Helping and contributing:
 //! It's easy to contribute to this crate, here are some options:
 //! - Share it to a friend.
 //! - Help improve this README.md, even with little details.
-//! - Open issues to the repository.
+//! - Open issues to the repository, or send a PR.
 //! - Leave a star on GitHub.
 //! - Use it!
 //!
