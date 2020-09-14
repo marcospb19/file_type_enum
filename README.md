@@ -30,17 +30,17 @@ fn main() {
 }
 ```
 
-Note: `FileType::from_path(path)` returns a io::Error if:
+Note: `FileType::from_path(path)` returns a `io::Error` if:
 * Path does not exist.
-* The user lacks permissions to read metadata on the path.
+* The user lacks permissions to read metadata from `path`.
 
 ---
 
 For each variant, there's a short hand `.is_VARIANT()`:
 
-`file_type.is_file()`      for `FileType::File`,
-`file_type.is_directory()` for `FileType::Directory`,
-`file_type.is_symlink()`   for `FileType::Symlink`,
+`file_type.is_file()`      for `FileType::File`, \
+`file_type.is_directory()` for `FileType::Directory`, \
+`file_type.is_symlink()`   for `FileType::Symlink`, \
 _And so on..._
 
 ```rust
@@ -90,4 +90,4 @@ It's easy to contribute to this crate, here are some options:
 - Use it!
 
 # TODO:
-Add feature to transform from and into libc's mode_t
+Add optional feature to transform from and into `libc`'s `mode_t`
