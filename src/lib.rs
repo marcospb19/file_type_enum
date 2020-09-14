@@ -1,3 +1,4 @@
+//! ![Rust](https://github.com/marcospb19/file_type_enum/workflows/Rust/badge.svg?branch=main)
 //! This crate grants a enum with one variant for each file type.
 //!
 //! **Cross-platform and small**, this crate has a single file with around _150_
@@ -86,7 +87,7 @@
 //! It's easy to contribute to this crate, here are some options:
 //! - Share it to a friend.
 //! - Help improve this README.md, even with little details.
-//! - Open issues to the repository, or send a PR.
+//! - Open an issue or PR in the repository.
 //! - Leave a star on GitHub.
 //! - Use it!
 //!

@@ -1,10 +1,14 @@
+![Rust](https://github.com/marcospb19/file_type_enum/workflows/Rust/badge.svg?branch=main)
+
+# file_type_enum
+
 This crate grants a enum with one variant for each file type.
 
 **Cross-platform and small**, this crate has a single file with around _150_
-lines of source code. Simplest implementation, should be in `std`. If you
-want to check file types, here's a _enum_ for you, don't rewrite it.
+lines of source code. Simplest implementation. if you want to check file
+types, here's a _enum_ for you, don't rewrite it.
 
-# Enum FileType:
+## Enum FileType:
 ```rust
 pub enum FileType {
     File,
@@ -17,7 +21,7 @@ pub enum FileType {
 }
 ```
 
-# Examples:
+## Examples:
 ```rust
 use file_type_enum::FileType;
 
@@ -58,11 +62,11 @@ fn main() {
 
 ---
 
-By default, if `path` points to _symlink_ `FileType::from_path()` considers
-the path at the symlink's target location (this implies that the returned
-file type can't be `FileType::Symlink`).
+By default, if `path` points to _symlink_, then `FileType::from_path()`
+considers the path at the _symlink_'s target location (this implies that the
+returned file type can't be `FileType::Symlink`).
 
-If you don't wanna follow _symlinks_, use `FileType::from_symlink_path`
+If you don't want to follow _symlinks_, use `FileType::from_symlink_path`
 instead, this function may return `Ok(FileType::Symlink)`.
 
 ```rust
@@ -79,15 +83,18 @@ fn main() {
 
 ---
 
-`FileType::from::<fs::FileType>(fs_ft)` is also available.
+The conversion `FileType::from::<fs::FileType>` is also available for
+convenience.
 
-# Helping and contributing:
+## Helping and contributing:
 It's easy to contribute to this crate, here are some options:
 - Share it to a friend.
 - Help improve this README.md, even with little details.
-- Open issues to the repository.
+- Open an issue or PR in the repository.
 - Leave a star on GitHub.
 - Use it!
 
-# TODO:
+## TODO:
 Add optional feature to transform from and into `libc`'s `mode_t`
+
+License: MIT
