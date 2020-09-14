@@ -1,6 +1,9 @@
-![Rust](https://github.com/marcospb19/file_type_enum/workflows/Rust/badge.svg?branch=main)
-
 # file_type_enum
+
+[![Crates.io](https://img.shields.io/crates/v/file_type_enum.svg)](https://crates.io/crates/file_type_enum)
+[![Rust](https://github.com/marcospb19/file_type_enum/workflows/Rust/badge.svg?branch=main)](https://github.com/marcospb19/file_type_enum/actions?query=workflow%3ARust)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/marcospb19/file_type_enum/blob/main/LICENSE)
+[![Docs.rs](https://docs.rs/file_type_enum/badge.svg)](https://docs.rs/file_type_enum)
 
 This crate grants a enum with one variant for each file type.
 
@@ -96,5 +99,3 @@ It's easy to contribute to this crate, here are some options:
 
 ## TODO:
 Add optional feature to transform from and into `libc`'s `mode_t`
-
-License: MIT
