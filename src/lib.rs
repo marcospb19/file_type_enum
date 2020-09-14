@@ -257,7 +257,7 @@ impl From<fs::FileType> for FileType {
             }
         };
 
-        #[cfg(windows)]
+        #[cfg(not(unix))]
         let result = {
             if ft.is_file() {
                 FileType::File
