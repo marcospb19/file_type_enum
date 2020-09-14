@@ -88,3 +88,6 @@ It's easy to contribute to this crate, here are some options:
 - Open issues to the repository.
 - Leave a star on GitHub.
 - Use it!
+
+# TODO:
+Add feature to transform from and into libc's mode_t
