@@ -8,3 +8,10 @@ repository = "https://github.com/marcospb19/file_type_enum"
 license = "MIT"
 keywords = ["filetype", "filesystem", "simple", "tiny"]
 categories = ["api-bindings", "filesystem"]
+
+[dependencies]
+libc = { version = "0.2", optional = true }
+
+[features]
+c-int-conversion = ["libc"]
+default = []

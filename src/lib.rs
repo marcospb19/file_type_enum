@@ -94,9 +94,6 @@
 //! - Open an issue or PR in the repository.
 //! - Leave a star on GitHub.
 //! - Use it!
-//!
-//! # TODO:
-//! Add optional feature to transform from and into `libc`'s `mode_t`
 
 use std::{fmt, fs, io, path::Path};
 
@@ -280,20 +277,39 @@ impl From<fs::FileType> for FileType {
     }
 }
 
+fn from_file(file: fs::File) -> io::Result<FileType> {
+    Ok(FileType::from(file.metadata()?.file_type()))
+}
+
+#[rustfmt::skip]
 impl fmt::Display for FileType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             FileType::File => write!(f, "regular file"),
             FileType::Directory => write!(f, "directory"),
             FileType::Symlink => write!(f, "symbolic link"),
-            #[cfg(unix)]
-            FileType::BlockDevice => write!(f, "block device"),
-            #[cfg(unix)]
-            FileType::CharDevice => write!(f, "char device"),
-            #[cfg(unix)]
-            FileType::Fifo => write!(f, "FIFO"),
-            #[cfg(unix)]
-            FileType::Socket => write!(f, "socket"),
+            #[cfg(unix)] FileType::BlockDevice => write!(f, "block device"),
+            #[cfg(unix)] FileType::CharDevice => write!(f, "char device"),
+            #[cfg(unix)] FileType::Fifo => write!(f, "FIFO"),
+            #[cfg(unix)] FileType::Socket => write!(f, "socket"),
+        }
+    }
+}
+
+#[cfg(feature = "mode-t-conversion")]
+use libc::mode_t;
+#[cfg(feature = "mode-t-conversion")]
+impl From<mode_t> for FileType {
+    fn from(bit_mask: mode_t) -> Self {
+        match bit_mask {
+            libc::S_IFREG => FileType::File,
+            libc::S_IFDIR => FileType::Directory,
+            libc::S_IFCHR => FileType::Symlink,
+            libc::S_IFBLK => FileType::BlockDevice,
+            libc::S_IFIFO => FileType::CharDevice,
+            libc::S_IFLNK => FileType::Fifo,
+            libc::S_IFSOCK => FileType::Socket,
+            _ => unreachable!(),
         }
     }
 }
