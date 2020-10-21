@@ -112,19 +112,16 @@ use std::os::unix::fs::FileTypeExt;
 ///     FileType::Socket      => { /* ... */ },
 /// }
 /// ```
+#[rustfmt::skip]
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy, Ord, PartialOrd)]
 pub enum FileType {
     File,
     Directory,
     Symlink,
-    #[cfg(unix)]
-    BlockDevice,
-    #[cfg(unix)]
-    CharDevice,
-    #[cfg(unix)]
-    Fifo,
-    #[cfg(unix)]
-    Socket,
+    #[cfg(unix)] BlockDevice,
+    #[cfg(unix)] CharDevice,
+    #[cfg(unix)] Fifo,
+    #[cfg(unix)] Socket,
 }
 
 impl FileType {
@@ -149,7 +146,7 @@ impl FileType {
     /// # Errors:
     /// - Path does not exist.
     /// - The user lacks permissions to run `fs::metadata(path)`.
-    pub fn from_path(path: impl AsRef<Path>) -> Result<Self, io::Error> {
+    pub fn from_path(path: impl AsRef<Path>) -> io::Result<Self> {
         let fs_file_type = fs::metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
         Ok(result)
@@ -176,7 +173,7 @@ impl FileType {
     /// # Errors:
     /// - Path does not exist.
     /// - The user lacks permissions to run `fs::symlink_metadata(path)`.
-    pub fn from_symlink_path(path: impl AsRef<Path>) -> Result<Self, io::Error> {
+    pub fn from_symlink_path(path: impl AsRef<Path>) -> io::Result<Self> {
         let fs_file_type = fs::symlink_metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
         Ok(result)
@@ -256,7 +253,7 @@ impl From<fs::FileType> for FileType {
             } else if ft.is_socket() {
                 FileType::Socket
             } else {
-                unreachable!("unknown file type {:?} encountered", ft)
+                unreachable!("file_type_enum: unknown file type {:?} encountered.", ft)
             }
         };
 
@@ -269,7 +266,7 @@ impl From<fs::FileType> for FileType {
             } else if ft.is_symlink() {
                 FileType::Symlink
             } else {
-                unreachable!("unknown file type {:?} encountered", ft)
+                unreachable!("file_type_enum: unknown file type {:?} encountered.", ft)
             }
         };
 
