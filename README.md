@@ -7,11 +7,11 @@
 
 This crate grants a enum with one variant for each file type.
 
-**Cross-platform and small**, this crate has a single file with around _150_
-lines of source code. Simplest implementation. if you want to check file
-types, here's a _enum_ for you, don't rewrite it.
+Cross-platform, this crate is made of a `lib.rs` with less than 200 lines of
+source code with a very simple enum implementation so that you don't have to
+rewrite your own.
 
-## Enum FileType:
+## Enum [`FileType`]:
 ```rust
 pub enum FileType {
     File,
@@ -37,9 +37,11 @@ fn main() {
 }
 ```
 
-Note: `FileType::from_path(path)` returns a `io::Error` if:
-* Path does not exist.
-* The user lacks permissions to read metadata from `path`.
+### Errors:
+`
+* If path does not exist
+* Or current user can't  permissions to read type information (metadata)
+  from `path`.
 
 ---
 
@@ -86,8 +88,21 @@ fn main() {
 
 ---
 
-The conversion `FileType::from::<fs::FileType>` is also available for
-convenience.
+## Conversions
+
+The `From` is implemented for the types:
+- `std::fs::FileType`
+- `libc::mode_t`
+
+The conversion [`FileType::from::<fs::FileType>`](FileType) is also
+available for convenience.
+
+## Future versions note:
+Changes might occur soon in future versions of the `std` _API_ for `Windows`
+symlinks (there are two types of symlink in `Windows`) or any other file
+types, when this happen, this crate will probably change it's _API_ too to
+be up to date with it. If you spot it before than me, please open a issue in
+the repository of this project.
 
 ## Helping and contributing:
 It's easy to contribute to this crate, here are some options:
@@ -96,6 +111,3 @@ It's easy to contribute to this crate, here are some options:
 - Open an issue or PR in the repository.
 - Leave a star on GitHub.
 - Use it!
-
-## TODO:
-Add optional feature to transform from and into `libc`'s `mode_t`
