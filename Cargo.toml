@@ -13,5 +13,5 @@ categories = ["api-bindings", "filesystem"]
 libc = { version = "0.2", optional = true }
 
 [features]
-c-int-conversion = ["libc"]
+mode-t-conversion = ["libc"]
 default = []
