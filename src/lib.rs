@@ -99,6 +99,9 @@
 //! - Open an issue or PR in the repository.
 //! - Leave a star on GitHub.
 //! - Use it!!!
+//!
+//! ### TODO:
+//! Add example on how to add the crate with the feature to the Cargo.toml.
 
 use std::{fmt, fs, io, path::Path};
 
