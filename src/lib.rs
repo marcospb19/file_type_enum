@@ -41,7 +41,7 @@
 //!
 //! For each variant, there is also a short hand method:
 //!
-//! ```rust ignore
+//! ```ignore
 //! let ft = FileType::from(path);
 //! if ft.is_regular() { ... }
 //! if ft.is_directory() { ... }
@@ -59,7 +59,7 @@
 //! let file_type = FileType::from_path(path).unwrap();
 //!
 //! if file_type.is_directory() {
-//!     println!("We are at the root a git repository.");
+//!     println!("We are at the root of a git repository.");
 //! }
 //! ```
 //!
