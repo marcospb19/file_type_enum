@@ -5,16 +5,16 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/marcospb19/file_type_enum/blob/main/LICENSE)
 [![Docs.rs](https://docs.rs/file_type_enum/badge.svg)](https://docs.rs/file_type_enum)
 
-This crate grants a enum with one variant for each file type.
+A enum with one variant for each file type.
 
-Cross-platform, this crate is made of a `lib.rs` with less than 200 lines of
-source code with a very simple enum implementation so that you don't have to
-rewrite your own.
+Cross-platform, this crate is made of a single small `lib.rs` with a very
+simple [enum](FileType) implementation so that you don't have to rewrite
+your own.
 
 ## Enum [`FileType`]:
 ```rust
 pub enum FileType {
-    File,
+    Regular,
     Directory,
     Symlink,
     BlockDevice, // unix only
@@ -28,81 +28,71 @@ pub enum FileType {
 ```rust
 use file_type_enum::FileType;
 
-fn main() {
-    let path = "/tmp";
-    let file_type = FileType::from_path(path).unwrap();
+let path = "/tmp";
+let file_type = FileType::from_path(path).unwrap();
 
-    println!("There's a {} at {}!", file_type, path);
-    // Outputs: "There's a directory at /tmp!"
-}
+println!("There's a {} at {}!", file_type, path);
+// Outputs: "There's a directory at /tmp!"
 ```
 
 ### Errors:
-`
-* If path does not exist
-* Or current user can't  permissions to read type information (metadata)
-  from `path`.
+- If path does not exist, or
+- Current user don't have permissions to read `fs::Metadata` from `path`.
 
 ---
 
-For each variant, there's a short hand `.is_VARIANT()`:
+For each variant, there is also a short hand method:
 
-`file_type.is_file()`      for `FileType::File`, \
-`file_type.is_directory()` for `FileType::Directory`, \
-`file_type.is_symlink()`   for `FileType::Symlink`, \
-_And so on..._
+```rust ignore
+let ft = FileType::from(path);
+if ft.is_regular() { ... }
+if ft.is_directory() { ... }
+if ft.is_symlink() { ... }
+if ft.is_block_device() { ... }
+if ft.is_char_device() { ... }
+if ft.is_fifo() { ... }
+if ft.is_socket() { ... }
+```rust
 
 ```rust
 use file_type_enum::FileType;
 
-fn main() {
-    let path = ".git";
-    let file_type = FileType::from_path(path).unwrap();
+let path = ".git";
+let file_type = FileType::from_path(path).unwrap();
 
-    if file_type.is_directory() {
-        println!("We are at the root a git repository.");
-    }
+if file_type.is_directory() {
+    println!("We are at the root a git repository.");
 }
 ```
 
 ---
 
-By default, if `path` points to _symlink_, then `FileType::from_path()`
-considers the path at the _symlink_'s target location (this implies that the
-returned file type can't be `FileType::Symlink`).
+If `path` points to a _symlink_, `from_path(path)` follows it, so the
+returned type can never be a _symlink_.
 
-If you don't want to follow _symlinks_, use `FileType::from_symlink_path`
-instead, this function may return `Ok(FileType::Symlink)`.
+To avoid this, use `FileType::from_symlink_path`, this don't follow, and can
+return a _symlink_.
 
 ```rust
 use file_type_enum::FileType;
 
-fn main() {
-    let path = "/dev/stdout";
-    let file_type = FileType::from_symlink_path(path).unwrap();
+let path = "/dev/stdout";
+let file_type = FileType::from_symlink_path(path).unwrap();
 
-    println!("There's a {} at {}!", file_type, path);
-    // Outputs: "There's a symbolic link at /dev/stdout!"
-}
+println!("There's a {} at {}!", file_type, path);
+// Outputs: "There's a symbolic link at /dev/stdout!"
 ```
 
 ---
 
 ## Conversions
-
-The `From` is implemented for the types:
-- `std::fs::FileType`
-- `libc::mode_t`
-
-The conversion [`FileType::from::<fs::FileType>`](FileType) is also
-available for convenience.
+- From `std::fs::FileType`.
+- From and into `libc::mode_t` (enable `mode-t-conversion` optional
+  feature).
 
 ## Future versions note:
-Changes might occur soon in future versions of the `std` _API_ for `Windows`
-symlinks (there are two types of symlink in `Windows`) or any other file
-types, when this happen, this crate will probably change it's _API_ too to
-be up to date with it. If you spot it before than me, please open a issue in
-the repository of this project.
+Changes might occur on `std` _API_ for `Windows` (related to _symlinks_), I
+personally don't consider this part very stable.
 
 ## Helping and contributing:
 It's easy to contribute to this crate, here are some options:
@@ -110,4 +100,7 @@ It's easy to contribute to this crate, here are some options:
 - Help improve this README.md, even with little details.
 - Open an issue or PR in the repository.
 - Leave a star on GitHub.
-- Use it!
+- Use it!!!
+
+#### TODO:
+Add example on how to add the crate with the feature to the Cargo.toml.
