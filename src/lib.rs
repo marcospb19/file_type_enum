@@ -3,16 +3,16 @@
 //! [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/marcospb19/file_type_enum/blob/main/LICENSE)
 //! [![Docs.rs](https://docs.rs/file_type_enum/badge.svg)](https://docs.rs/file_type_enum)
 //!
-//! This crate grants a enum with one variant for each file type.
+//! A enum with one variant for each file type.
 //!
-//! Cross-platform, this crate is made of a `lib.rs` with less than 200 lines of
-//! source code with a very simple enum implementation so that you don't have to
-//! rewrite your own.
+//! Cross-platform, this crate is made of a single small `lib.rs` with a very
+//! simple [enum](FileType) implementation so that you don't have to rewrite
+//! your own.
 //!
 //! # Enum [`FileType`]:
 //! ```rust
 //! pub enum FileType {
-//!     File,
+//!     Regular,
 //!     Directory,
 //!     Symlink,
 //!     BlockDevice, // unix only
@@ -26,81 +26,71 @@
 //! ```rust
 //! use file_type_enum::FileType;
 //!
-//! fn main() {
-//!     let path = "/tmp";
-//!     let file_type = FileType::from_path(path).unwrap();
+//! let path = "/tmp";
+//! let file_type = FileType::from_path(path).unwrap();
 //!
-//!     println!("There's a {} at {}!", file_type, path);
-//!     // Outputs: "There's a directory at /tmp!"
-//! }
+//! println!("There's a {} at {}!", file_type, path);
+//! // Outputs: "There's a directory at /tmp!"
 //! ```
 //!
 //! ## Errors:
-//! `
-//! * If path does not exist
-//! * Or current user can't  permissions to read type information (metadata)
-//!   from `path`.
+//! - If path does not exist, or
+//! - Current user don't have permissions to read `fs::Metadata` from `path`.
 //!
 //! ---
 //!
-//! For each variant, there's a short hand `.is_VARIANT()`:
+//! For each variant, there is also a short hand method:
 //!
-//! `file_type.is_file()`      for `FileType::File`, \
-//! `file_type.is_directory()` for `FileType::Directory`, \
-//! `file_type.is_symlink()`   for `FileType::Symlink`, \
-//! _And so on..._
+//! ```rust ignore
+//! let ft = FileType::from(path);
+//! if ft.is_regular() { ... }
+//! if ft.is_directory() { ... }
+//! if ft.is_symlink() { ... }
+//! if ft.is_block_device() { ... }
+//! if ft.is_char_device() { ... }
+//! if ft.is_fifo() { ... }
+//! if ft.is_socket() { ... }
+//! ```
 //!
 //! ```rust
 //! use file_type_enum::FileType;
 //!
-//! fn main() {
-//!     let path = ".git";
-//!     let file_type = FileType::from_path(path).unwrap();
+//! let path = ".git";
+//! let file_type = FileType::from_path(path).unwrap();
 //!
-//!     if file_type.is_directory() {
-//!         println!("We are at the root a git repository.");
-//!     }
+//! if file_type.is_directory() {
+//!     println!("We are at the root a git repository.");
 //! }
 //! ```
 //!
 //! ---
 //!
-//! By default, if `path` points to _symlink_, then `FileType::from_path()`
-//! considers the path at the _symlink_'s target location (this implies that the
-//! returned file type can't be `FileType::Symlink`).
+//! If `path` points to a _symlink_, `from_path(path)` follows it, so the
+//! returned type can never be a _symlink_.
 //!
-//! If you don't want to follow _symlinks_, use `FileType::from_symlink_path`
-//! instead, this function may return `Ok(FileType::Symlink)`.
+//! To avoid this, use `FileType::from_symlink_path`, this don't follow, and can
+//! return a _symlink_.
 //!
 //! ```rust
 //! use file_type_enum::FileType;
 //!
-//! fn main() {
-//!     let path = "/dev/stdout";
-//!     let file_type = FileType::from_symlink_path(path).unwrap();
+//! let path = "/dev/stdout";
+//! let file_type = FileType::from_symlink_path(path).unwrap();
 //!
-//!     println!("There's a {} at {}!", file_type, path);
-//!     // Outputs: "There's a symbolic link at /dev/stdout!"
-//! }
+//! println!("There's a {} at {}!", file_type, path);
+//! // Outputs: "There's a symbolic link at /dev/stdout!"
 //! ```
 //!
 //! ---
 //!
 //! # Conversions
-//!
-//! The `From` is implemented for the types:
-//! - `std::fs::FileType`
-//! - `libc::mode_t`
-//!
-//! The conversion [`FileType::from::<fs::FileType>`](FileType) is also
-//! available for convenience.
+//! - From `std::fs::FileType`.
+//! - From and into `libc::mode_t` (enable `mode-t-conversion` optional
+//!   feature).
 //!
 //! # Future versions note:
-//! Changes might occur soon in future versions of the `std` _API_ for `Windows`
-//! symlinks (there are two types of symlink in `Windows`) or any other file
-//! types, when this happen, this crate will probably change it's _API_ too to
-//! be up to date with it. If you spot it before than me, please open a issue in
-//! the repository of this project.
+//! Changes might occur on `std` _API_ for `Windows` (related to _symlinks_), I
+//! personally don't consider this part very stable.
 //!
 //! # Helping and contributing:
 //! It's easy to contribute to this crate, here are some options:
@@ -108,17 +98,17 @@
 //! - Help improve this README.md, even with little details.
 //! - Open an issue or PR in the repository.
 //! - Leave a star on GitHub.
-//! - Use it!
+//! - Use it!!!
 
 use std::{fmt, fs, io, path::Path};
 
 #[cfg(unix)]
 use std::os::unix::fs::FileTypeExt;
 
-/// Enum with a variant for each file type.
+/// An enum with a variant for each file type.
 /// ```ignore
 /// match file_type {
-///     FileType::File        => { /* ... */ },
+///     FileType::Regular     => { /* ... */ },
 ///     FileType::Directory   => { /* ... */ },
 ///     FileType::Symlink     => { /* ... */ },
 ///     FileType::BlockDevice => { /* ... */ },
@@ -130,7 +120,7 @@ use std::os::unix::fs::FileTypeExt;
 #[rustfmt::skip]
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy, Ord, PartialOrd)]
 pub enum FileType {
-    File,
+    Regular,
     Directory,
     Symlink,
     #[cfg(unix)] BlockDevice,
@@ -148,13 +138,11 @@ impl FileType {
     /// # Example:
     /// ```rust
     /// use file_type_enum::FileType;
+    /// use std::io;
     ///
-    /// fn main() {
-    ///     let path = "/dev/tty";
-    ///     let file_type = FileType::from_path(path).unwrap();
-    ///
-    ///     println!("There's a {} at {}!", file_type, path);
-    ///     // Outputs: "There's a char device at /dev/tty!"
+    /// fn main() -> io::Result<()> {
+    ///     let is_everything_alright = FileType::from_path("/dev/tty")?.is_char_device();
+    ///     Ok(())
     /// }
     /// ```
     ///
@@ -176,13 +164,11 @@ impl FileType {
     /// ```rust
     /// use file_type_enum::FileType;
     ///
-    /// fn main() {
-    ///     let path = "/dev/stdout";
-    ///     let file_type = FileType::from_symlink_path(path).unwrap();
+    /// let path = "/dev/stdout";
+    /// let file_type = FileType::from_symlink_path(path).unwrap();
     ///
-    ///     println!("There's a {} at {}!", file_type, path);
-    ///     // Outputs: "There's a symlink at /dev/stdout!"
-    /// }
+    /// println!("There's a {} at {}!", file_type, path);
+    /// // Outputs: "There's a symlink at /dev/stdout!"
     /// ```
     ///
     /// # Errors:
@@ -194,57 +180,36 @@ impl FileType {
         Ok(result)
     }
 
-    pub fn is_file(&self) -> bool {
-        match self {
-            FileType::File => true,
-            _ => false,
-        }
+    pub fn is_regular(&self) -> bool {
+        matches!(self, FileType::Regular)
     }
 
     pub fn is_directory(&self) -> bool {
-        match self {
-            FileType::Directory => true,
-            _ => false,
-        }
+        matches!(self, FileType::Directory)
     }
 
     pub fn is_symlink(&self) -> bool {
-        match self {
-            FileType::Symlink => true,
-            _ => false,
-        }
+        matches!(self, FileType::Symlink)
     }
 
     #[cfg(unix)]
     pub fn is_block_device(&self) -> bool {
-        match self {
-            FileType::BlockDevice => true,
-            _ => false,
-        }
+        matches!(self, FileType::BlockDevice)
     }
 
     #[cfg(unix)]
     pub fn is_char_device(&self) -> bool {
-        match self {
-            FileType::CharDevice => true,
-            _ => false,
-        }
+        matches!(self, FileType::CharDevice)
     }
 
     #[cfg(unix)]
     pub fn is_fifo(&self) -> bool {
-        match self {
-            FileType::Fifo => true,
-            _ => false,
-        }
+        matches!(self, FileType::Fifo)
     }
 
     #[cfg(unix)]
     pub fn is_socket(&self) -> bool {
-        match self {
-            FileType::Socket => true,
-            _ => false,
-        }
+        matches!(self, FileType::Socket)
     }
 }
 
@@ -254,7 +219,7 @@ impl From<fs::FileType> for FileType {
         #[cfg(unix)]
         let result = {
             if ft.is_file() {
-                FileType::File
+                FileType::Regular
             } else if ft.is_dir() {
                 FileType::Directory
             } else if ft.is_symlink() {
@@ -268,20 +233,20 @@ impl From<fs::FileType> for FileType {
             } else if ft.is_socket() {
                 FileType::Socket
             } else {
-                unreachable!("file_type_enum: unknown file type {:?} encountered.", ft)
+                unreachable!("file_type_enum: unexpected file type: {:?}.", ft)
             }
         };
 
         #[cfg(not(unix))]
         let result = {
             if ft.is_file() {
-                FileType::File
+                FileType::Regular
             } else if ft.is_dir() {
                 FileType::Directory
             } else if ft.is_symlink() {
                 FileType::Symlink
             } else {
-                unreachable!("file_type_enum: unknown file type {:?} encountered.", ft)
+                unreachable!("file_type_enum: unexpected file type: {:?}.", ft)
             }
         };
 
@@ -289,7 +254,7 @@ impl From<fs::FileType> for FileType {
     }
 }
 
-fn from_file(file: fs::File) -> io::Result<FileType> {
+pub fn from_file(file: fs::File) -> io::Result<FileType> {
     Ok(FileType::from(file.metadata()?.file_type()))
 }
 
@@ -297,7 +262,7 @@ fn from_file(file: fs::File) -> io::Result<FileType> {
 impl fmt::Display for FileType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            FileType::File => write!(f, "regular file"),
+            FileType::Regular => write!(f, "regular file"),
             FileType::Directory => write!(f, "directory"),
             FileType::Symlink => write!(f, "symbolic link"),
             #[cfg(unix)] FileType::BlockDevice => write!(f, "block device"),
@@ -312,9 +277,9 @@ impl fmt::Display for FileType {
 use libc::mode_t;
 #[cfg(feature = "mode-t-conversion")]
 impl From<mode_t> for FileType {
-    fn from(bit_mask: mode_t) -> Self {
-        match bit_mask {
-            libc::S_IFREG => FileType::File,
+    fn from(bits: mode_t) -> Self {
+        match bits {
+            libc::S_IFREG => FileType::Regular,
             libc::S_IFDIR => FileType::Directory,
             libc::S_IFCHR => FileType::Symlink,
             libc::S_IFBLK => FileType::BlockDevice,
@@ -323,5 +288,42 @@ impl From<mode_t> for FileType {
             libc::S_IFSOCK => FileType::Socket,
             _ => unreachable!(),
         }
+    }
+}
+#[cfg(feature = "mode-t-conversion")]
+impl FileType {
+    pub fn bits(&self) -> mode_t {
+        match self {
+            FileType::Regular => libc::S_IFREG,
+            FileType::Directory => libc::S_IFDIR,
+            FileType::Symlink => libc::S_IFCHR,
+            FileType::BlockDevice => libc::S_IFBLK,
+            FileType::CharDevice => libc::S_IFIFO,
+            FileType::Fifo => libc::S_IFLNK,
+            FileType::Socket => libc::S_IFSOCK,
+        }
+    }
+}
+#[cfg(feature = "mode-t-conversion")]
+impl From<FileType> for mode_t {
+    fn from(ft: FileType) -> Self {
+        ft.bits()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::FileType;
+
+    #[test]
+    fn test_with_this_repository_structured() {
+        let this_file = FileType::from_path("src/lib.rs").unwrap();
+        assert!(this_file.is_regular());
+    }
+
+    #[cfg(feature = "mode-t-conversion")]
+    #[test]
+    fn test_mode_t_conversion() {
+        assert_eq!(libc::S_IFDIR, FileType::from_path("src/").unwrap().bits());
     }
 }
