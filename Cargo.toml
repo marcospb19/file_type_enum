@@ -2,7 +2,7 @@
 name = "file_type_enum"
 version = "0.11.1"
 authors = ["João M. Bezerra <marcospb19@hotmail.com>"]
-edition = "2018"
+edition = "2021"
 description = "An enum with a variant for each file type."
 repository = "https://github.com/marcospb19/file_type_enum"
 license = "MIT"
