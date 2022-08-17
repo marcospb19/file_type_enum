@@ -20,9 +20,9 @@
 //!
 //! If you don't need an enum, check these methods from `std` instead:
 //!
-//! - [`Path::is_file`].
-//! - [`Path::is_dir`].
-//! - [`Path::is_symlink`].
+//! - [`Path::is_file`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file).
+//! - [`Path::is_dir`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir).
+//! - [`Path::is_symlink`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_symlink).
 //!
 //! # Example
 //!
@@ -42,18 +42,22 @@
 //!
 //! Note that the [`FileType::from_path`] follows symlinks and [`FileType::from_symlink_path`] does not.
 //!
+//! [`FileType::from_path`]: https://docs.rs/file_type_enum/latest/file_type_enum/enum.FileType.html#method.from_path
+//! [`FileType::from_symlink_path`]: https://docs.rs/file_type_enum/latest/file_type_enum/enum.FileType.html#method.from_symlink_path
+//!
 //! # Conversions
 //!
 //! - From [`AsRef<Path>`], [`fs::Metadata`] and [std's `FileType`].
 //! - From and into [`libc::mode_t`] (via the feature `"mode-t-conversion"`).
 //!
+//! [`AsRef<Path>`]: https://doc.rust-lang.org/std/path/struct.Path.html
+//! [`fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
+//! [std's `FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
+//! [`libc::mode_t`]: https://docs.rs/libc/latest/libc/type.mode_t.html
+//!
 //! # Contributing
 //!
 //! Issues and PRs are welcome.
-//!
-//! [`AsRef<Path>`]: std::path::Path
-//! [`fs::Metadata`]: std::fs::Metadata
-//! [std's `FileType`]: std::fs::FileType
 
 #[cfg(feature = "mode-t-conversion")]
 mod mode_t_conversion_feature;

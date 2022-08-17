@@ -20,20 +20,21 @@ pub enum FileType {
 
 If you don't need an enum, check these methods from `std` instead:
 
-- [`Path::is_file`].
-- [`Path::is_dir`].
-- [`Path::is_symlink`].
+- [`Path::is_file`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file).
+- [`Path::is_dir`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir).
+- [`Path::is_symlink`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_symlink).
 
 ## Example
 
 ```rust
 use file_type_enum::FileType;
+use std::io;
 
 fn main() -> io::Result<()> {
     let file_type = FileType::from_path("/tmp")?;
 
-    println!("There's a {} at {}!", file_type, path);
-    // Out:  "There's a directory at /tmp!"
+    println!("There's a {} at /tmp", file_type);
+    // Out:  "There's a directory at /tmp"
 
     Ok(())
 }
@@ -41,17 +42,21 @@ fn main() -> io::Result<()> {
 
 Note that the [`FileType::from_path`] follows symlinks and [`FileType::from_symlink_path`] does not.
 
+[`FileType::from_path`]: https://docs.rs/file_type_enum/latest/file_type_enum/enum.FileType.html#method.from_path
+[`FileType::from_symlink_path`]: https://docs.rs/file_type_enum/latest/file_type_enum/enum.FileType.html#method.from_symlink_path
+
 ## Conversions
 
 - From [`AsRef<Path>`], [`fs::Metadata`] and [std's `FileType`].
 - From and into [`libc::mode_t`] (via the feature `"mode-t-conversion"`).
 
+[`AsRef<Path>`]: https://doc.rust-lang.org/std/path/struct.Path.html
+[`fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
+[std's `FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
+[`libc::mode_t`]: https://docs.rs/libc/latest/libc/type.mode_t.html
+
 ## Contributing
 
 Issues and PRs are welcome.
-
-[`AsRef<Path>`]: std::path::Path
-[`fs::Metadata`]: std::fs::Metadata
-[std's `FileType`]: std::fs::FileType
 
 License: MIT
