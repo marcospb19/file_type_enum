@@ -18,6 +18,7 @@ impl From<mode_t> for FileType {
 }
 
 impl FileType {
+    /// Convert [`FileType`] into the [`libc`] integer bitmask equivalent.
     pub fn bits(&self) -> mode_t {
         match self {
             FileType::Regular => libc::S_IFREG,
