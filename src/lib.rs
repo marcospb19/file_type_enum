@@ -4,9 +4,7 @@
 //! [![Docs.rs](https://docs.rs/file_type_enum/badge.svg)](https://docs.rs/file_type_enum)
 //! [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/marcospb19/file_type_enum/blob/main/LICENSE)
 //!
-//! A enum with one variant for each file type.
-//!
-//! # Enum [`FileType`]:
+//! An enum with a variant for each file type.
 //!
 //! ```rust
 //! pub enum FileType {
@@ -20,83 +18,41 @@
 //! }
 //! ```
 //!
-//! # Example:
+//! If you don't need an enum, check these methods from `std` instead:
 //!
-//! ```rust
+//! - [`Path::is_file`].
+//! - [`Path::is_dir`].
+//! - [`Path::is_symlink`].
+//!
+//! # Example
+//!
+//! ```
 //! use file_type_enum::FileType;
 //!
-//! let path = "/tmp";
-//! let file_type = FileType::from_path(path).unwrap();
+//! fn main() -> io::Result<()> {
+//!     let file_type = FileType::from_path("/tmp")?;
 //!
-//! println!("There's a {} at {}!", file_type, path);
-//! // Outputs: "There's a directory at /tmp!"
-//! ```
+//!     println!("There's a {} at {}!", file_type, path);
+//!     // Out:  "There's a directory at /tmp!"
 //!
-//! # Errors:
-//!
-//! - If path does not exist, or
-//! - Current user don't have permissions to read `fs::Metadata` from `path`.
-//!
-//! ---
-//!
-//! For each variant, there is also a short hand method:
-//!
-//! ```ignore
-//! let ft = FileType::from(path);
-//! if ft.is_regular() { ... }
-//! if ft.is_directory() { ... }
-//! if ft.is_symlink() { ... }
-//! if ft.is_block_device() { ... }
-//! if ft.is_char_device() { ... }
-//! if ft.is_fifo() { ... }
-//! if ft.is_socket() { ... }
-//! ```
-//!
-//! ```rust
-//! use file_type_enum::FileType;
-//!
-//! let path = ".git";
-//! let file_type = FileType::from_path(path).unwrap();
-//!
-//! if file_type.is_directory() {
-//!     println!("We are at the root of a git repository.");
+//!     Ok(())
 //! }
 //! ```
 //!
-//! ---
-//!
-//! If `path` points to a _symlink_, `from_path(path)` follows it, so the
-//! returned type can never be a _symlink_.
-//!
-//! To avoid this, use `FileType::from_symlink_path`, this don't follow, and can
-//! return a _symlink_.
-//!
-//! ```rust
-//! use file_type_enum::FileType;
-//!
-//! let path = "/dev/stdout";
-//! let file_type = FileType::from_symlink_path(path).unwrap();
-//!
-//! println!("There's a {} at {}!", file_type, path);
-//! // Outputs: "There's a symbolic link at /dev/stdout!"
-//! ```
-//!
-//! ---
+//! Note that the [`FileType::from_path`] follows symlinks and [`FileType::from_symlink_path`] does not.
 //!
 //! # Conversions
 //!
-//! - From `std::fs::FileType`.
-//! - From and into `libc::mode_t` (enable the `mode-t-conversion` optional
-//!   feature).
+//! - From [`AsRef<Path>`], [`fs::Metadata`] and [std's `FileType`].
+//! - From and into [`libc::mode_t`] (via the feature `"mode-t-conversion"`).
 //!
-//! # Helping and contributing:
+//! # Contributing
 //!
-//! It's easy to contribute to this crate, here are some options:
-//! - Share it to a friend.
-//! - Help improve this README.md, even with little details.
-//! - Open an issue or PR in the repository.
-//! - Leave a star on GitHub.
-//! - Use it!!!
+//! Issues and PRs are welcome.
+//!
+//! [`AsRef<Path>`]: std::path::Path
+//! [`fs::Metadata`]: std::fs::Metadata
+//! [std's `FileType`]: std::fs::FileType
 
 #[cfg(feature = "mode-t-conversion")]
 mod mode_t_conversion_feature;
@@ -141,12 +97,11 @@ pub enum FileType {
 }
 
 impl FileType {
-    /// Try to get `FileType` from a path.
+    /// Reads a `FileType` from a path.
     ///
-    /// This function follows symlinks, so it can never return a
-    /// `FileType::Symlink`.
+    /// This function follows symlinks, so it can never return a `FileType::Symlink`.
     ///
-    /// # Example:
+    /// # Example
     ///
     /// ```rust
     /// use file_type_enum::FileType;
@@ -158,21 +113,21 @@ impl FileType {
     /// }
     /// ```
     ///
-    /// # Errors:
-    /// - Path does not exist.
-    /// - The user lacks permissions to run `fs::metadata(path)`.
+    /// # Errors
+    ///
+    /// - Path does not exist, or
+    /// - Current user lacks permissions to read `fs::Metadata` of `path`.
     pub fn from_path(path: impl AsRef<Path>) -> io::Result<Self> {
         let fs_file_type = fs::metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
         Ok(result)
     }
 
-    /// Try to get `FileType` from a path.
+    /// Reads a `FileType` from a path, considers symlinks.
     ///
-    /// Don't follow symlinks, so the result can be the variant
-    /// `FileType::Symlink` too.
+    /// This function does not follow symlinks, so the result can be the variant `FileType::Symlink` too, unlike [`FileType::from_path`].
     ///
-    /// # Example:
+    /// # Example
     ///
     /// ```rust
     /// use file_type_enum::FileType;
@@ -184,9 +139,10 @@ impl FileType {
     /// // Outputs: "There's a symlink at /dev/stdout!"
     /// ```
     ///
-    /// # Errors:
-    /// - Path does not exist.
-    /// - The user lacks permissions to run `fs::symlink_metadata(path)`.
+    /// # Errors
+    ///
+    /// - Path does not exist, or
+    /// - Current user lacks permissions to read `fs::Metadata` of `path`.
     pub fn from_symlink_path(path: impl AsRef<Path>) -> io::Result<Self> {
         let fs_file_type = fs::symlink_metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
