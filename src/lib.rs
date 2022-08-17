@@ -21,7 +21,8 @@
 //! }
 //! ```
 //!
-//! # Examples:
+//! # Example:
+//!
 //! ```rust
 //! use file_type_enum::FileType;
 //!
@@ -33,6 +34,7 @@
 //! ```
 //!
 //! ## Errors:
+//!
 //! - If path does not exist, or
 //! - Current user don't have permissions to read `fs::Metadata` from `path`.
 //!
@@ -83,40 +85,42 @@
 //! ---
 //!
 //! # Conversions
+//!
 //! - From `std::fs::FileType`.
-//! - From and into `libc::mode_t` (enable `mode-t-conversion` optional
+//! - From and into `libc::mode_t` (enable the `mode-t-conversion` optional
 //!   feature).
 //!
-//! # Future versions note:
-//! Changes might occur on `std` _API_ for `Windows` (related to _symlinks_), I
-//! personally don't consider this part very stable.
-//!
 //! # Helping and contributing:
+//!
 //! It's easy to contribute to this crate, here are some options:
 //! - Share it to a friend.
 //! - Help improve this README.md, even with little details.
 //! - Open an issue or PR in the repository.
 //! - Leave a star on GitHub.
 //! - Use it!!!
-//!
-//! ### TODO:
-//! Add example on how to add the crate with the feature to the Cargo.toml.
 
-use std::{fmt, fs, io, path::Path};
+#[cfg(feature = "mode-t-conversion")]
+mod mode_t_conversion_feature;
+
+#[cfg(feature = "mode-t-conversion")]
+pub use mode_t_conversion_feature::*;
+
+use std::{convert::TryFrom, fmt, fs, io, path::Path};
 
 #[cfg(unix)]
 use std::os::unix::fs::FileTypeExt;
 
 /// An enum with a variant for each file type.
+///
 /// ```ignore
 /// match file_type {
 ///     FileType::Regular     => { /* ... */ },
 ///     FileType::Directory   => { /* ... */ },
 ///     FileType::Symlink     => { /* ... */ },
-///     FileType::BlockDevice => { /* ... */ },
-///     FileType::CharDevice  => { /* ... */ },
-///     FileType::Fifo        => { /* ... */ },
-///     FileType::Socket      => { /* ... */ },
+///     FileType::BlockDevice => { /* ... */ }, // unix only
+///     FileType::CharDevice  => { /* ... */ }, // unix only
+///     FileType::Fifo        => { /* ... */ }, // unix only
+///     FileType::Socket      => { /* ... */ }, // unix only
 /// }
 /// ```
 #[rustfmt::skip]
@@ -138,6 +142,7 @@ impl FileType {
     /// `FileType::Symlink`.
     ///
     /// # Example:
+    ///
     /// ```rust
     /// use file_type_enum::FileType;
     /// use std::io;
@@ -163,6 +168,7 @@ impl FileType {
     /// `FileType::Symlink` too.
     ///
     /// # Example:
+    ///
     /// ```rust
     /// use file_type_enum::FileType;
     ///
@@ -256,12 +262,16 @@ impl From<fs::FileType> for FileType {
     }
 }
 
-pub fn from_file(file: fs::File) -> io::Result<FileType> {
-    Ok(FileType::from(file.metadata()?.file_type()))
+impl TryFrom<&fs::File> for FileType {
+    type Error = io::Error;
+
+    fn try_from(file: &fs::File) -> Result<Self, Self::Error> {
+        Ok(FileType::from(file.metadata()?.file_type()))
+    }
 }
 
-#[rustfmt::skip]
 impl fmt::Display for FileType {
+    #[rustfmt::skip]
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             FileType::Regular => write!(f, "regular file"),
@@ -272,44 +282,6 @@ impl fmt::Display for FileType {
             #[cfg(unix)] FileType::Fifo => write!(f, "FIFO"),
             #[cfg(unix)] FileType::Socket => write!(f, "socket"),
         }
-    }
-}
-
-#[cfg(feature = "mode-t-conversion")]
-use libc::mode_t;
-#[cfg(feature = "mode-t-conversion")]
-impl From<mode_t> for FileType {
-    fn from(bits: mode_t) -> Self {
-        match bits {
-            libc::S_IFREG => FileType::Regular,
-            libc::S_IFDIR => FileType::Directory,
-            libc::S_IFCHR => FileType::Symlink,
-            libc::S_IFBLK => FileType::BlockDevice,
-            libc::S_IFIFO => FileType::CharDevice,
-            libc::S_IFLNK => FileType::Fifo,
-            libc::S_IFSOCK => FileType::Socket,
-            _ => unreachable!(),
-        }
-    }
-}
-#[cfg(feature = "mode-t-conversion")]
-impl FileType {
-    pub fn bits(&self) -> mode_t {
-        match self {
-            FileType::Regular => libc::S_IFREG,
-            FileType::Directory => libc::S_IFDIR,
-            FileType::Symlink => libc::S_IFCHR,
-            FileType::BlockDevice => libc::S_IFBLK,
-            FileType::CharDevice => libc::S_IFIFO,
-            FileType::Fifo => libc::S_IFLNK,
-            FileType::Socket => libc::S_IFSOCK,
-        }
-    }
-}
-#[cfg(feature = "mode-t-conversion")]
-impl From<FileType> for mode_t {
-    fn from(ft: FileType) -> Self {
-        ft.bits()
     }
 }
 
@@ -327,5 +299,9 @@ mod tests {
     #[test]
     fn test_mode_t_conversion() {
         assert_eq!(libc::S_IFDIR, FileType::from_path("src/").unwrap().bits());
+        assert_eq!(
+            libc::S_IFREG,
+            FileType::from_path("src/lib.rs").unwrap().bits()
+        );
     }
 }
