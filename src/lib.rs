@@ -28,12 +28,13 @@
 //!
 //! ```
 //! use file_type_enum::FileType;
+//! use std::io;
 //!
 //! fn main() -> io::Result<()> {
 //!     let file_type = FileType::from_path("/tmp")?;
 //!
-//!     println!("There's a {} at {}!", file_type, path);
-//!     // Out:  "There's a directory at /tmp!"
+//!     println!("There's a {} at /tmp", file_type);
+//!     // Out:  "There's a directory at /tmp"
 //!
 //!     Ok(())
 //! }
@@ -66,15 +67,17 @@ pub use mode_t_conversion_feature::*;
 
 /// An enum with a variant for each file type.
 ///
-/// ```ignore
+/// ```
+/// # use file_type_enum::FileType;
+/// # let file_type = FileType::from_path("src/").unwrap();
 /// match file_type {
-///     FileType::Regular     => { /* ... */ },
-///     FileType::Directory   => { /* ... */ },
-///     FileType::Symlink     => { /* ... */ },
-///     FileType::BlockDevice => { /* ... */ }, // unix only
-///     FileType::CharDevice  => { /* ... */ }, // unix only
-///     FileType::Fifo        => { /* ... */ }, // unix only
-///     FileType::Socket      => { /* ... */ }, // unix only
+///     FileType::Regular     => {},
+///     FileType::Directory   => {},
+///     FileType::Symlink     => {},
+///     FileType::BlockDevice => {}, // unix only
+///     FileType::CharDevice  => {}, // unix only
+///     FileType::Fifo        => {}, // unix only
+///     FileType::Socket      => {}, // unix only
 /// }
 /// ```
 #[rustfmt::skip]
@@ -135,8 +138,8 @@ impl FileType {
     /// let path = "/dev/stdout";
     /// let file_type = FileType::from_symlink_path(path).unwrap();
     ///
-    /// println!("There's a {} at {}!", file_type, path);
-    /// // Outputs: "There's a symlink at /dev/stdout!"
+    /// println!("There's a {file_type} at {path}");
+    /// // Out:  "There's a symlink     at /dev/stdout"
     /// ```
     ///
     /// # Errors
