@@ -1,3 +1,5 @@
+#![warn(missing_docs)]
+
 //! [![Crates.io](https://img.shields.io/crates/v/file_type_enum.svg)](https://crates.io/crates/file_type_enum)
 //! [![Docs.rs](https://docs.rs/file_type_enum/badge.svg)](https://docs.rs/file_type_enum)
 //! [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/marcospb19/file_type_enum/blob/main/LICENSE)
@@ -122,12 +124,19 @@ pub use mode_t_conversion_feature::*;
 #[rustfmt::skip]
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy, Ord, PartialOrd)]
 pub enum FileType {
+    /// A regular file (e.g. '.txt', '.rs', '.zip').
     Regular,
+    /// A directory, folder of files.
     Directory,
+    /// A symbolic link, points to another path.
     Symlink,
+    /// Unix block device.
     #[cfg(unix)] BlockDevice,
+    /// Unix char device.
     #[cfg(unix)] CharDevice,
+    /// Unix FIFO.
     #[cfg(unix)] Fifo,
+    /// Unix socket.
     #[cfg(unix)] Socket,
 }
 
@@ -184,33 +193,40 @@ impl FileType {
         Ok(result)
     }
 
+    /// Returns true if is a [`FileType::Regular`].
     pub fn is_regular(&self) -> bool {
         matches!(self, FileType::Regular)
     }
 
+    /// Returns true if is a [`FileType::Directory`].
     pub fn is_directory(&self) -> bool {
         matches!(self, FileType::Directory)
     }
 
+    /// Returns true if is a [`FileType::Symlink`].
     pub fn is_symlink(&self) -> bool {
         matches!(self, FileType::Symlink)
     }
 
+    /// Returns true if is a [`FileType::BlockDevice`].
     #[cfg(unix)]
     pub fn is_block_device(&self) -> bool {
         matches!(self, FileType::BlockDevice)
     }
 
+    /// Returns true if is a [`FileType::CharDevice`].
     #[cfg(unix)]
     pub fn is_char_device(&self) -> bool {
         matches!(self, FileType::CharDevice)
     }
 
+    /// Returns true if is a [`FileType::Fifo`].
     #[cfg(unix)]
     pub fn is_fifo(&self) -> bool {
         matches!(self, FileType::Fifo)
     }
 
+    /// Returns true if is a [`FileType::Socket`].
     #[cfg(unix)]
     pub fn is_socket(&self) -> bool {
         matches!(self, FileType::Socket)
