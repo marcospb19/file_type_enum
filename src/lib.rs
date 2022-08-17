@@ -4,11 +4,8 @@
 //!
 //! A enum with one variant for each file type.
 //!
-//! Cross-platform, this crate is made of a single small `lib.rs` with a very
-//! simple [enum](FileType) implementation so that you don't have to rewrite
-//! your own.
-//!
 //! # Enum [`FileType`]:
+//!
 //! ```rust
 //! pub enum FileType {
 //!     Regular,
@@ -33,7 +30,7 @@
 //! // Outputs: "There's a directory at /tmp!"
 //! ```
 //!
-//! ## Errors:
+//! # Errors:
 //!
 //! - If path does not exist, or
 //! - Current user don't have permissions to read `fs::Metadata` from `path`.
@@ -104,7 +101,7 @@ mod mode_t_conversion_feature;
 
 #[cfg(unix)]
 use std::os::unix::fs::FileTypeExt;
-use std::{convert::TryFrom, fmt, fs, io, path::Path};
+use std::{fmt, fs, io, path::Path};
 
 #[cfg(feature = "mode-t-conversion")]
 pub use mode_t_conversion_feature::*;
@@ -261,11 +258,9 @@ impl From<fs::FileType> for FileType {
     }
 }
 
-impl TryFrom<&fs::File> for FileType {
-    type Error = io::Error;
-
-    fn try_from(file: &fs::File) -> Result<Self, Self::Error> {
-        Ok(FileType::from(file.metadata()?.file_type()))
+impl From<fs::Metadata> for FileType {
+    fn from(metadata: fs::Metadata) -> Self {
+        metadata.file_type().into()
     }
 }
 
