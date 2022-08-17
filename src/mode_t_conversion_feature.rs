@@ -1,5 +1,6 @@
-use crate::FileType;
 use libc::mode_t;
+
+use crate::FileType;
 
 impl From<mode_t> for FileType {
     fn from(bits: mode_t) -> Self {

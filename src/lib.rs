@@ -102,13 +102,12 @@
 #[cfg(feature = "mode-t-conversion")]
 mod mode_t_conversion_feature;
 
-#[cfg(feature = "mode-t-conversion")]
-pub use mode_t_conversion_feature::*;
-
-use std::{convert::TryFrom, fmt, fs, io, path::Path};
-
 #[cfg(unix)]
 use std::os::unix::fs::FileTypeExt;
+use std::{convert::TryFrom, fmt, fs, io, path::Path};
+
+#[cfg(feature = "mode-t-conversion")]
+pub use mode_t_conversion_feature::*;
 
 /// An enum with a variant for each file type.
 ///
