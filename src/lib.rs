@@ -1,12 +1,8 @@
 #![warn(missing_docs)]
 
-//! [![Crates.io](https://img.shields.io/crates/v/file_type_enum.svg)](https://crates.io/crates/file_type_enum)
-//! [![Docs.rs](https://docs.rs/file_type_enum/badge.svg)](https://docs.rs/file_type_enum)
-//! [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/marcospb19/file_type_enum/blob/main/LICENSE)
-//!
 //! An enum with a variant for each file type.
 //!
-//! ```rust
+//! ```
 //! pub enum FileType {
 //!     Regular,
 //!     Directory,
@@ -24,26 +20,53 @@
 //! - [`Path::is_dir`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir).
 //! - [`Path::is_symlink`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_symlink).
 //!
-//! # Example
+//! # Example:
 //!
 //! ```
+//! use std::{fs, io, path::Path};
+//!
 //! use file_type_enum::FileType;
-//! use std::io;
 //!
-//! fn main() -> io::Result<()> {
-//!     let file_type = FileType::from_path("/tmp")?;
+//! fn move_file(from: &Path, to: &Path) -> io::Result<()> {
+//!     let from_type = FileType::symlink_read_at(from)?;
+//!     let to_type = FileType::symlink_read_at(to)?;
 //!
-//!     println!("There's a {} at /tmp", file_type);
-//!     // Out:  "There's a directory at /tmp"
+//!     use FileType::{Directory, Regular, Symlink};
+//!
+//!     match (from_type, to_type) {
+//!         (Directory, Directory) => {
+//!             println!("Replacing directory {to:?} by directory {from:?}.");
+//!         }
+//!         (Regular, Regular) | (Symlink, Symlink) => {
+//!             // Might print:
+//!             //       "Overwriting regular file at PATH."
+//!             //       "Overwriting symbolic link at PATH."
+//!             println!("Overwriting {from_type} at {to:?} by {to:?}.");
+//!         }
+//!         (_, Directory) => {
+//!             println!("Moving file at {from:?} into folder {to:?}.");
+//!             fs::rename(from, to)?;
+//!         }
+//!         (_, _) => {
+//!             // Might print:
+//!             // -   "Cannot overwrite regular file  with a symbolic link."
+//!             // -   "Cannot overwrite directory     with a symbolic link."
+//!             // -   "Cannot overwrite symbolic link with a regular file."
+//!             panic!("Cannot overwrite {to_type}     with a {from_type}.");
+//!         }
+//!     }
 //!
 //!     Ok(())
 //! }
 //! ```
 //!
-//! Note that the [`FileType::from_path`] follows symlinks and [`FileType::from_symlink_path`] does not.
+//! As shown in the example `FileType` also implements `Display`.
 //!
-//! [`FileType::from_path`]: https://docs.rs/file_type_enum/latest/file_type_enum/enum.FileType.html#method.from_path
-//! [`FileType::from_symlink_path`]: https://docs.rs/file_type_enum/latest/file_type_enum/enum.FileType.html#method.from_symlink_path
+//! # Warning
+//!
+//! Note that, like `std` functions, [`FileType::read_at`] follows symlinks, therefore it is
+//! impossible to get the [`FileType::Symlink`] variant. If you want symlink-awareness, use
+//! [`FileType::symlink_read_at`] instead.
 //!
 //! # Conversions
 //!
@@ -54,10 +77,6 @@
 //! [`fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
 //! [std's `FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
 //! [`libc::mode_t`]: https://docs.rs/libc/latest/libc/type.mode_t.html
-//!
-//! # Contributing
-//!
-//! Issues and PRs are welcome.
 
 #[cfg(feature = "mode-t-conversion")]
 mod mode_t_conversion_feature;
@@ -73,7 +92,7 @@ pub use mode_t_conversion_feature::*;
 ///
 /// ```
 /// # use file_type_enum::FileType;
-/// # let file_type = FileType::from_path("src/").unwrap();
+/// # let file_type = FileType::read_at("src/").unwrap();
 /// match file_type {
 ///     FileType::Regular     => {},
 ///     FileType::Directory   => {},
@@ -87,7 +106,7 @@ pub use mode_t_conversion_feature::*;
 #[rustfmt::skip]
 #[derive(Debug, Eq, PartialEq, Hash, Clone, Copy, Ord, PartialOrd)]
 pub enum FileType {
-    /// A regular file (e.g. '.txt', '.rs', '.zip').
+    /// A regular file.
     Regular,
     /// A directory, folder of files.
     Directory,
@@ -108,23 +127,11 @@ impl FileType {
     ///
     /// This function follows symlinks, so it can never return a `FileType::Symlink`.
     ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use file_type_enum::FileType;
-    /// use std::io;
-    ///
-    /// fn main() -> io::Result<()> {
-    ///     let is_everything_alright = FileType::from_path("/dev/tty")?.is_char_device();
-    ///     Ok(())
-    /// }
-    /// ```
-    ///
     /// # Errors
     ///
     /// - Path does not exist, or
     /// - Current user lacks permissions to read `fs::Metadata` of `path`.
-    pub fn from_path(path: impl AsRef<Path>) -> io::Result<Self> {
+    pub fn read_at(path: impl AsRef<Path>) -> io::Result<Self> {
         let fs_file_type = fs::metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
         Ok(result)
@@ -132,25 +139,14 @@ impl FileType {
 
     /// Reads a `FileType` from a path, considers symlinks.
     ///
-    /// This function does not follow symlinks, so the result can be the variant `FileType::Symlink` too, unlike [`FileType::from_path`].
-    ///
-    /// # Example
-    ///
-    /// ```rust
-    /// use file_type_enum::FileType;
-    ///
-    /// let path = "/dev/stdout";
-    /// let file_type = FileType::from_symlink_path(path).unwrap();
-    ///
-    /// println!("There's a {file_type} at {path}");
-    /// // Out:  "There's a symlink     at /dev/stdout"
-    /// ```
+    /// This function does not follow symlinks, therefore, `FileType::Symlink` can be returned, if
+    /// you don't want that, see [`FileType::read_at`].
     ///
     /// # Errors
     ///
     /// - Path does not exist, or
     /// - Current user lacks permissions to read `fs::Metadata` of `path`.
-    pub fn from_symlink_path(path: impl AsRef<Path>) -> io::Result<Self> {
+    pub fn symlink_read_at(path: impl AsRef<Path>) -> io::Result<Self> {
         let fs_file_type = fs::symlink_metadata(path.as_ref())?.file_type();
         let result = FileType::from(fs_file_type);
         Ok(result)
@@ -264,7 +260,7 @@ mod tests {
 
     #[test]
     fn test_with_this_repository_structured() {
-        let this_file = FileType::from_path("src/lib.rs").unwrap();
+        let this_file = FileType::read_at("src/lib.rs").unwrap();
         assert!(this_file.is_regular());
     }
 }
