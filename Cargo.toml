@@ -1,6 +1,6 @@
 [package]
 name = "file_type_enum"
-version = "2.0.0"
+version = "2.0.1"
 authors = ["João M. Bezerra <marcospb19@hotmail.com>"]
 edition = "2021"
 description = "An enum with a variant for each file type."
