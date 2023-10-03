@@ -14,11 +14,13 @@
 //! }
 //! ```
 //!
-//! If you don't need an enum, check these methods from `std` instead:
+//! # Alternatives:
 //!
-//! - [`Path::is_file`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file).
-//! - [`Path::is_dir`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir).
-//! - [`Path::is_symlink`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_symlink).
+//! 1. If you want a enum tree, check the crate [`fs-tree`](https://docs.rs/fs-tree).
+//! 2. If you don't need an enum, check these methods from `std` instead:
+//!     - [`Path::is_file`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file).
+//!     - [`Path::is_dir`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir).
+//!     - [`Path::is_symlink`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_symlink).
 //!
 //! # Example:
 //!
