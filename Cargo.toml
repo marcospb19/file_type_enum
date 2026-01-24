@@ -1,8 +1,8 @@
 [package]
 name = "file_type_enum"
-version = "2.0.1"
+version = "3.0.0"
 authors = ["João M. Bezerra <marcospb19@hotmail.com>"]
-edition = "2021"
+edition = "2024"
 description = "An enum with a variant for each file type."
 repository = "https://github.com/marcospb19/file_type_enum"
 license = "MIT"
@@ -10,8 +10,8 @@ keywords = ["filetype", "filesystem"]
 categories = ["api-bindings", "filesystem"]
 
 [dependencies]
-libc = { version = "0.2", optional = true }
+libc = { version = "0.2.180", optional = true }
+fs-err = { version = "3.2.2", optional = true }
 
 [features]
-mode-t-conversion = ["libc"]
-default = []
+default = ["fs-err"]

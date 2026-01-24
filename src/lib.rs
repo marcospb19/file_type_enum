@@ -73,22 +73,29 @@
 //! # Conversions
 //!
 //! - From [`AsRef<Path>`], [`fs::Metadata`] and [std's `FileType`].
-//! - From and into [`libc::mode_t`] (via the feature `"mode-t-conversion"`).
+//! - From and into [`libc::mode_t`] (via the feature `"libc"`).
 //!
+//! # Feature flags:
+//! - `fs-err`: uses [fs-err] for better IO error messages.
+//! - `libc`: gives libc enum conversions.
+//!
+//! [fs-err]: https://docs.rs/fs-err
 //! [`AsRef<Path>`]: https://doc.rust-lang.org/std/path/struct.Path.html
 //! [`fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
 //! [std's `FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
 //! [`libc::mode_t`]: https://docs.rs/libc/latest/libc/type.mode_t.html
 
-#[cfg(feature = "mode-t-conversion")]
+#[cfg(feature = "libc")]
 mod mode_t_conversion_feature;
 
+#[cfg(not(feature = "fs-err"))]
+use std::fs;
 #[cfg(unix)]
 use std::os::unix::fs::FileTypeExt;
-use std::{fmt, fs, io, path::Path};
+use std::{fmt, fs::Metadata, io, path::Path};
 
-#[cfg(feature = "mode-t-conversion")]
-pub use mode_t_conversion_feature::*;
+#[cfg(feature = "fs-err")]
+use fs_err as fs;
 
 /// An enum with a variant for each file type.
 ///
@@ -135,7 +142,7 @@ impl FileType {
     /// - Current user lacks permissions to read `fs::Metadata` of `path`.
     pub fn read_at(path: impl AsRef<Path>) -> io::Result<Self> {
         let fs_file_type = fs::metadata(path.as_ref())?.file_type();
-        let result = FileType::from(fs_file_type);
+        let result = Self::from(fs_file_type);
         Ok(result)
     }
 
@@ -150,52 +157,52 @@ impl FileType {
     /// - Current user lacks permissions to read `fs::Metadata` of `path`.
     pub fn symlink_read_at(path: impl AsRef<Path>) -> io::Result<Self> {
         let fs_file_type = fs::symlink_metadata(path.as_ref())?.file_type();
-        let result = FileType::from(fs_file_type);
+        let result = Self::from(fs_file_type);
         Ok(result)
     }
 
     /// Returns true if is a [`FileType::Regular`].
     pub fn is_regular(&self) -> bool {
-        matches!(self, FileType::Regular)
+        matches!(self, Self::Regular)
     }
 
     /// Returns true if is a [`FileType::Directory`].
     pub fn is_directory(&self) -> bool {
-        matches!(self, FileType::Directory)
+        matches!(self, Self::Directory)
     }
 
     /// Returns true if is a [`FileType::Symlink`].
     pub fn is_symlink(&self) -> bool {
-        matches!(self, FileType::Symlink)
+        matches!(self, Self::Symlink)
     }
 
     /// Returns true if is a [`FileType::BlockDevice`].
     #[cfg(unix)]
     pub fn is_block_device(&self) -> bool {
-        matches!(self, FileType::BlockDevice)
+        matches!(self, Self::BlockDevice)
     }
 
     /// Returns true if is a [`FileType::CharDevice`].
     #[cfg(unix)]
     pub fn is_char_device(&self) -> bool {
-        matches!(self, FileType::CharDevice)
+        matches!(self, Self::CharDevice)
     }
 
     /// Returns true if is a [`FileType::Fifo`].
     #[cfg(unix)]
     pub fn is_fifo(&self) -> bool {
-        matches!(self, FileType::Fifo)
+        matches!(self, Self::Fifo)
     }
 
     /// Returns true if is a [`FileType::Socket`].
     #[cfg(unix)]
     pub fn is_socket(&self) -> bool {
-        matches!(self, FileType::Socket)
+        matches!(self, Self::Socket)
     }
 }
 
-impl From<fs::FileType> for FileType {
-    fn from(ft: fs::FileType) -> Self {
+impl From<std::fs::FileType> for FileType {
+    fn from(ft: std::fs::FileType) -> Self {
         // Check each type
         #[cfg(unix)]
         let result = {
@@ -235,8 +242,8 @@ impl From<fs::FileType> for FileType {
     }
 }
 
-impl From<fs::Metadata> for FileType {
-    fn from(metadata: fs::Metadata) -> Self {
+impl From<Metadata> for FileType {
+    fn from(metadata: Metadata) -> Self {
         metadata.file_type().into()
     }
 }

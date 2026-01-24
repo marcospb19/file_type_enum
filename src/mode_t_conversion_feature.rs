@@ -44,10 +44,10 @@ mod tests {
 
     #[test]
     fn test_mode_t_conversion() {
-        assert_eq!(libc::S_IFDIR, FileType::from_path("src/").unwrap().bits());
+        assert_eq!(libc::S_IFDIR, FileType::read_at("src/").unwrap().bits());
         assert_eq!(
             libc::S_IFREG,
-            FileType::from_path("src/lib.rs").unwrap().bits()
+            FileType::read_at("src/lib.rs").unwrap().bits()
         );
     }
 }

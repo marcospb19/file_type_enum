@@ -73,8 +73,15 @@ impossible to get the [`FileType::Symlink`] variant. If you want symlink-awarene
 ## Conversions
 
 - From [`AsRef<Path>`], [`fs::Metadata`] and [std's `FileType`].
-- From and into [`libc::mode_t`] (via the feature `"mode-t-conversion"`).
+- From and into [`libc::mode_t`] (via the feature `"libc"`).
 
+
+# Feature Flags
+
+- `fs-err`: uses [fs-err] for better IO error messages.
+- `libc`: gives libc enum conversions.
+
+[fs-err]: https://docs.rs/fs-err
 [`AsRef<Path>`]: https://doc.rust-lang.org/std/path/struct.Path.html
 [`FileType::read_at`]: https://docs.rs/file_type_enum/latest/file_type_enum/enum.FileType.html#method.read_at
 [`FileType::symlink_read_at`]: https://docs.rs/file_type_enum/latest/file_type_enum/enum.FileType.html#method.symlink_read_at
