@@ -16,7 +16,7 @@
 //!
 //! # Alternatives:
 //!
-//! 1. If you want a enum tree, check the crate [`fs-tree`](https://docs.rs/fs-tree).
+//! 1. If you want an enum tree, check the crate [`fs-tree`](https://docs.rs/fs-tree).
 //! 2. If you don't need an enum, check these methods from `std` instead:
 //!     - [`Path::is_file`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_file).
 //!     - [`Path::is_dir`](https://doc.rust-lang.org/std/path/struct.Path.html#method.is_dir).
@@ -43,7 +43,7 @@
 //!             // Might print:
 //!             //       "Overwriting regular file at PATH."
 //!             //       "Overwriting symbolic link at PATH."
-//!             println!("Overwriting {from_type} at {to:?} by {to:?}.");
+//!             println!("Overwriting {to_type} at {to:?} with {from:?}.");
 //!         }
 //!         (_, Directory) => {
 //!             println!("Moving file at {from:?} into folder {to:?}.");
@@ -54,7 +54,7 @@
 //!             // -   "Cannot overwrite regular file  with a symbolic link."
 //!             // -   "Cannot overwrite directory     with a symbolic link."
 //!             // -   "Cannot overwrite symbolic link with a regular file."
-//!             panic!("Cannot overwrite {to_type}     with a {from_type}.");
+//!             panic!("Cannot overwrite {to_type} with a {from_type}.");
 //!         }
 //!     }
 //!
