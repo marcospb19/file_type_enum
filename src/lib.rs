@@ -75,8 +75,9 @@
 //! - From [`AsRef<Path>`], [`fs::Metadata`] and [std's `FileType`].
 //! - From and into [`libc::mode_t`] (via the feature `"libc"`).
 //!
-//! # Feature flags:
-//! - `fs-err`: uses [fs-err] for better IO error messages.
+//! # Feature flags
+//!
+//! - `fs-err` (enabled by default): uses [fs-err] for better IO error messages.
 //! - `libc`: gives libc enum conversions.
 //!
 //! [fs-err]: https://docs.rs/fs-err
@@ -84,6 +85,9 @@
 //! [`fs::Metadata`]: https://doc.rust-lang.org/std/fs/struct.Metadata.html
 //! [std's `FileType`]: https://doc.rust-lang.org/std/fs/struct.FileType.html
 //! [`libc::mode_t`]: https://docs.rs/libc/latest/libc/type.mode_t.html
+//! [`FileType::read_at`]: crate::FileType::read_at
+//! [`FileType::symlink_read_at`]: crate::FileType::symlink_read_at
+//! [`FileType::Symlink`]: crate::FileType::Symlink
 
 #[cfg(feature = "libc")]
 mod mode_t_conversion_feature;

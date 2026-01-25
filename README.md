@@ -76,9 +76,9 @@ impossible to get the [`FileType::Symlink`] variant. If you want symlink-awarene
 - From and into [`libc::mode_t`] (via the feature `"libc"`).
 
 
-# Feature Flags
+# Feature flags
 
-- `fs-err`: uses [fs-err] for better IO error messages.
+- `fs-err` (enabled by default): uses [fs-err] for better IO error messages.
 - `libc`: gives libc enum conversions.
 
 [fs-err]: https://docs.rs/fs-err
