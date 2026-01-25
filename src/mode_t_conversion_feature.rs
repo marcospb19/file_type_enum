@@ -7,10 +7,10 @@ impl From<mode_t> for FileType {
         match bits {
             libc::S_IFREG => FileType::Regular,
             libc::S_IFDIR => FileType::Directory,
-            libc::S_IFCHR => FileType::Symlink,
+            libc::S_IFLNK => FileType::Symlink,
             libc::S_IFBLK => FileType::BlockDevice,
-            libc::S_IFIFO => FileType::CharDevice,
-            libc::S_IFLNK => FileType::Fifo,
+            libc::S_IFCHR => FileType::CharDevice,
+            libc::S_IFIFO => FileType::Fifo,
             libc::S_IFSOCK => FileType::Socket,
             _ => unreachable!(),
         }
@@ -23,10 +23,10 @@ impl FileType {
         match self {
             FileType::Regular => libc::S_IFREG,
             FileType::Directory => libc::S_IFDIR,
-            FileType::Symlink => libc::S_IFCHR,
+            FileType::Symlink => libc::S_IFLNK,
             FileType::BlockDevice => libc::S_IFBLK,
-            FileType::CharDevice => libc::S_IFIFO,
-            FileType::Fifo => libc::S_IFLNK,
+            FileType::CharDevice => libc::S_IFCHR,
+            FileType::Fifo => libc::S_IFIFO,
             FileType::Socket => libc::S_IFSOCK,
         }
     }
